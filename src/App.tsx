@@ -1,17 +1,21 @@
-import './App.css'
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "./App.css";
+import LoginPage from "./pages/login.page";
+import ProtectedRoute from "./components/protected-route";
+import AddDevicePage from "./pages/add-device.page";
 
 function App() {
-
   return (
-    <div className='m-auto flex flex-row items-center'>
-      <h1 className='text-xl font-bold'>TailwindCSS</h1>
-      <p className=''>This sentence is styled using TailwindCSS</p>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
 
-      <ul>
-        <li></li>
-      </ul>
-    </div>
-  )
+        <Route element={<ProtectedRoute />}>
+          <Route path="/add-device" element={<AddDevicePage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
