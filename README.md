@@ -2,9 +2,11 @@
 
 Steps:
 
-1. bun install
-2. bun run dev (ON ROOT)
+1. npm install
+2. npm run dev (ON ROOT)
 
 Full command on package.json
 
-Remember to db:generate, db:migrate when the model is changed
+Remember to db:generate, db:migrate when the database schema is changed
+
+and run check / format, lint

@@ -1,6 +1,6 @@
 import express from "express";
-import { getMe, login, register } from "../controllers/auth";
 import { expressjwt as jwt } from "express-jwt";
+import { getMe, login, register } from "../controllers/auth";
 import { jwtSecret } from "../lib/env";
 
 export const authRouter = express.Router();

@@ -9,7 +9,7 @@ export { eq, sql } from "drizzle-orm";
 export * from "./query";
 
 if (!process.env.DATABASE_URL) {
-    throw new Error("Database URL missing!");
+	throw new Error("Database URL missing!");
 }
 
 export const db = drizzle(process.env.DATABASE_URL);
