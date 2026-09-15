@@ -1,115 +1,106 @@
-import argon2 from "argon2";
 import type { Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import {
-	getUserByEmail,
-	getUserById,
-	registerUser,
-} from "../../../../packages/db/src";
-import {
-	loginSchema,
-	registerSchema,
+    loginSchema,
+    registerSchema,
 } from "../../../../packages/validators/src";
-import { jwtSecret } from "../lib/env";
+import { supabaseAdmin, supabaseAuth } from "../lib/supabase";
 
 interface AuthRequest extends Request {
-	auth?: {
-		userId: string;
-		iss?: string;
-		exp?: number;
-	};
+    user?: {
+        id: string;
+        email?: string;
+        user_metadata?: Record<string, any>;
+    };
 }
 
 export const login = async (req: Request, res: Response) => {
-	try {
-		const { email, password } = loginSchema.parse(req.body);
-		const user = await getUserByEmail(email);
+    try {
+        const { email, password } = loginSchema.parse(req.body);
 
-		if (!user?.[0]) {
-			return res
-				.status(401)
-				.json({ ok: false, message: "Invalid credentials" });
-		}
+        const { data, error } = await supabaseAuth.auth.signInWithPassword({
+            email,
+            password,
+        });
 
-		const dbUser = user[0];
+        if (error || !data.session) {
+            return res.status(401).json({
+                ok: false,
+                message: error?.message || "Invalid credentials",
+            });
+        }
 
-		const isPasswordValid = await argon2.verify(dbUser.password, password);
-		if (!isPasswordValid) {
-			return res
-				.status(401)
-				.json({ ok: false, message: "Invalid credentials" });
-		}
-
-		const token = jwt.sign({ userId: dbUser.id }, jwtSecret, {
-			issuer: "APHS",
-			expiresIn: "30d",
-			algorithm: "HS256",
-		});
-
-		res.status(200).json({ ok: true, token });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ ok: false, message: "Internal Server Error" });
-	}
+        res.status(200).json({
+            ok: true,
+            token: data.session.access_token,
+            refreshToken: data.session.refresh_token,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, message: "Internal Server Error" });
+    }
 };
 
 export const register = async (req: Request, res: Response) => {
-	try {
-		const { username, email, password } = registerSchema.parse(req.body);
+    try {
+        const { username, email, password } = registerSchema.parse(req.body);
 
-		const existingUser = await getUserByEmail(email);
-		if (existingUser?.length) {
-			return res.status(400).json({
-				ok: false,
-				message: "User already exists!",
-			});
-		}
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: { username },
+        });
 
-		const hashedPassword = await argon2.hash(password);
+        if (error || !data.user) {
+            return res.status(400).json({
+                ok: false,
+                message: error?.message || "Failed to create user",
+            });
+        }
 
-		const user = await registerUser({
-			username,
-			password: hashedPassword,
-			email,
-		});
+        const { data: sessionData, error: sessionError } =
+            await supabaseAuth.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-		const createdUser = user?.[0];
-		if (!createdUser?.id) {
-			return res
-				.status(500)
-				.json({ ok: false, message: "Failed to create user" });
-		}
+        if (sessionError || !sessionData.session) {
+            return res.status(201).json({
+                ok: true,
+                message: "User created, please sign in.",
+                user: data.user,
+            });
+        }
 
-		const token = jwt.sign({ userId: createdUser.id }, jwtSecret, {
-			issuer: "APHS",
-			expiresIn: "30d",
-			algorithm: "HS256",
-		});
-
-		res.status(201).json({ ok: true, token });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ ok: false, message: "Internal Server Error" });
-	}
+        res.status(201).json({
+            ok: true,
+            token: sessionData.session.access_token,
+            refreshToken: sessionData.session.refresh_token,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, message: "Internal Server Error" });
+    }
 };
 
 export const getMe = async (req: AuthRequest, res: Response) => {
-	try {
-		const userId = req.auth?.userId;
-		if (!userId) {
-			return res.status(401).json({ ok: false, message: "Unauthorized" });
-		}
+    try {
+        const user = req.user;
+        if (!user?.id) {
+            return res.status(401).json({ ok: false, message: "Unauthorized" });
+        }
 
-		const user = await getUserById(userId);
-		if (!user?.[0]) {
-			return res.status(401).json({ ok: false, message: "Unauthorized" });
-		}
-
-		const { password: _, ...safeUser } = user[0];
-
-		res.status(200).json({ ok: true, user: safeUser });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ ok: false, message: "Internal Server Error" });
-	}
+        res.status(200).json({
+            ok: true,
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.user_metadata?.username,
+                ...user.user_metadata,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, message: "Internal Server Error" });
+    }
 };
