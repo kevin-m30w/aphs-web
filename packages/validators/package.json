@@ -1,0 +1,19 @@
+{
+	"name": "@app/validators",
+	"module": "index.ts",
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"private": true,
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@app/validators": "workspace:*",
+		"@app/db": "workspace:*"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"zod": "^4.5.4"
+	}
+}

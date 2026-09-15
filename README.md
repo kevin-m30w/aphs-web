@@ -1,21 +1,10 @@
-## Getting Started
-Follow thes steps to set up and run the project locally.
+# APHS
 
-### Prerequisites
-* **Node.js** (v18 or higher recommended)
-* **pnpm** (Refer to the [pnpm Installation Guide](https://pnpm.io/installation) if not installed)
+Steps:
 
-### Local Development
-1. **Install dependencies:**
-    ```bash
-    pnpm install
-    ```
+1. bun install
+2. bun run dev (ON ROOT)
 
-2. **Start development server:**
-    ```bash
-    pnpm dev
-    ```
+Full command on package.json
 
-3. **Open the app:**
-
-    Navigate to http://localhost:5173 in your browser.
+Remember to db:generate, db:migrate when the model is changed

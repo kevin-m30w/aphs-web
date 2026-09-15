@@ -1,0 +1,18 @@
+{
+    "$schema": "https://turborepo.dev/schema.json",
+    "ui": "tui",
+    "tasks": {
+        "dev": {
+            "persistent": true,
+            "cache": false
+        },
+        "db:generate": {
+            "persistent": true,
+            "cache": false
+        },
+        "db:migrate": {
+            "persistent": true,
+            "cache": false
+        }
+    }
+}
