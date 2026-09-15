@@ -19,3 +19,8 @@ Follow thes steps to set up and run the project locally.
 3. **Open the app:**
 
     Navigate to http://localhost:5173 in your browser.
+
+Note:
+If you don't have .env.local yet, please create the file at the root directory and insert Supabase Variables:
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
