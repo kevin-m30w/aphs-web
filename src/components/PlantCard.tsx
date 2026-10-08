@@ -41,20 +41,35 @@ export const PlantCard: React.FC<PlantCardProps> = ({
 
           {/* Humidity & Action Row */}
           <div className="mt-1.5 flex items-end justify-between gap-1">
-            <div>
-              <p className="text-[11px] sm:text-xs text-amber-950/75 font-medium">Humidity:</p>
-              <div className="flex items-center gap-1 text-[#48B0F7] font-bold text-sm sm:text-base">
-                <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#48B0F7] text-[#48B0F7]" />
-                <span className="text-[#F7A503] font-extrabold">{humidity}%</span>
+            <div className="flex items-center gap-3">
+              <div>
+                <p className="text-[11px] sm:text-xs text-amber-950/75 font-medium">Humidity:</p>
+                <div className="flex items-center gap-1 text-[#48B0F7] font-bold text-sm sm:text-base">
+                  <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#48B0F7] text-[#48B0F7]" />
+                  <span className="text-[#F7A503] font-extrabold">{humidity}%</span>
+                </div>
               </div>
+
+              {/* Circular Droplets Button */}
+              <button
+                type="button"
+                aria-label={`Water ${name}`}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#48B0F7] hover:bg-[#3ba0e6] 
+                text-white flex items-center justify-center shadow-xs transition-transform active:scale-95 hover:scale-110 cursor-pointer shrink-0"
+              >
+                <Droplets className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
+              </button>
             </div>
 
-            {/* Non-functional Water Button */}
+            {/* Detail Button */}
             <button
               type="button"
-              disabled
-              aria-label={`Water ${name}`}
-              className="bg-[#F7A503] text-white font-bold text-[11px] sm:text-xs px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl flex items-center gap-1 shadow-sm opacity-95 cursor-default select-none"
+              aria-label={`Details for ${name}`}
+              className="bg-[#F7A503] text-white font-bold text-[11px] 
+              sm:text-xs px-3 sm:px-3.5 
+              py-1.5 rounded-lg sm:rounded-xl flex items-center gap-1 shadow-sm opacity-100 cursor-default select-none 
+              hover:bg-[#d69f30] transition-transform duration-200 active:scale-70 hover:cursor-pointer
+              hover:scale-110"
             >
               <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" />
               detail
