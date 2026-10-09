@@ -33,14 +33,12 @@ export const DeviceStatus: React.FC<DeviceStatusProps> = ({
       <div className="flex flex-col gap-1 text-left">
         <div className="flex items-center gap-2">
           <span
-            className={`w-2.5 h-2.5 rounded-full ${
-              isConnected ? 'bg-[#768C3A] animate-pulse' : 'bg-rose-500'
-            }`}
+            className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-[#768C3A] animate-pulse' : 'bg-rose-500'
+              }`}
           />
           <span
-            className={`text-base sm:text-lg font-black tracking-tight flex items-center gap-1.5 ${
-              isConnected ? 'text-[#556925]' : 'text-rose-600'
-            }`}
+            className={`text-base sm:text-lg font-black tracking-tight flex items-center gap-1.5 ${isConnected ? 'text-[#556925]' : 'text-rose-600'
+              }`}
           >
             {isConnected ? (
               <>
@@ -69,19 +67,18 @@ export const DeviceStatus: React.FC<DeviceStatusProps> = ({
         type="button"
         onClick={handleToggle}
         disabled={isReconnecting}
-        className={`text-xs sm:text-sm font-black px-4 py-2 rounded-xl border-2 transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5 shadow-xs shrink-0 ${
-          isConnected
+        className={`text-xs sm:text-sm font-black px-4 py-2 rounded-xl border-2 transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5 shadow-xs shrink-0 ${isConnected
             ? 'bg-white hover:bg-rose-50 text-[#556925] hover:text-rose-700 border-[#768C3A]/60 hover:border-rose-300'
             : 'bg-[#768C3A] hover:bg-[#556925] text-white border-[#556925]'
-        }`}
+          }`}
       >
         <RefreshCw className={`w-3.5 h-3.5 ${isReconnecting ? 'animate-spin' : ''}`} />
         <span>
           {isReconnecting
             ? 'Connecting...'
             : isConnected
-            ? 'Disconnect'
-            : 'Connect'}
+              ? 'Disconnect'
+              : 'Connect'}
         </span>
       </button>
     </div>

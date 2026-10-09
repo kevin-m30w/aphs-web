@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droplets, Target } from 'lucide-react';
+import { Droplet, Target } from 'lucide-react';
 
 export interface MoistureDisplayProps {
   humidity: number;
@@ -17,7 +17,7 @@ export const MoistureDisplay: React.FC<MoistureDisplayProps> = ({
       {/* Left: Moisture Percentage & Icon */}
       <div className="flex items-center gap-3 sm:gap-4 shrink-0">
         <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-sky-100/90 flex items-center justify-center text-sky-600 border border-sky-300/80 shadow-xs shrink-0">
-          <Droplets className="w-6 h-6 sm:w-7 sm:h-7 fill-sky-500 text-sky-500" />
+          <Droplet className="w-6 h-6 sm:w-7 sm:h-7 fill-sky-500 text-sky-500" />
         </div>
         <div className="flex flex-col">
           <div className="flex items-baseline text-black leading-none">
@@ -38,10 +38,6 @@ export const MoistureDisplay: React.FC<MoistureDisplayProps> = ({
       <div className="flex-1 w-full flex flex-col justify-center gap-1.5">
         <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-amber-950/75 px-0.5">
           <span>Soil Moisture Level</span>
-          <span className="flex items-center gap-1 text-[#2b72a4]">
-            <Target className="w-3.5 h-3.5" />
-            Target: <span className="font-extrabold text-black">{humidityLimit}%</span>
-          </span>
         </div>
 
         <div className="w-full bg-sky-950/10 h-4 sm:h-5 rounded-xl overflow-hidden p-0.5 border border-sky-300/70 shadow-inner relative">
