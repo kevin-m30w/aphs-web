@@ -34,13 +34,13 @@ export const PlantActions: React.FC<PlantActionsProps> = ({
   };
 
   return (
-    <div className="w-full max-w-xs flex flex-col gap-3">
-      {/* Water Button */}
+    <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Primary Water Action Button */}
       <button
         type="button"
         onClick={handleWaterClick}
         disabled={isWatering}
-        className={`w-full py-3 px-6 rounded-2xl font-black text-base sm:text-lg flex items-center justify-center gap-2 shadow-sm transition-all duration-200 cursor-pointer active:scale-95 ${
+        className={`w-full py-3 px-4 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-xs transition-all duration-200 cursor-pointer active:scale-95 ${
           waterSuccess
             ? 'bg-[#768C3A] text-white border-2 border-[#556925]'
             : 'bg-[#F7A503] hover:bg-[#d69f30] text-white border-2 border-[#e69800]'
@@ -48,41 +48,41 @@ export const PlantActions: React.FC<PlantActionsProps> = ({
       >
         {isWatering ? (
           <>
-            <RefreshCw className="w-5 h-5 animate-spin" />
+            <RefreshCw className="w-4 h-4 animate-spin" />
             <span>Watering...</span>
           </>
         ) : waterSuccess ? (
           <>
-            <Check className="w-5 h-5 stroke-[3]" />
+            <Check className="w-4 h-4 stroke-[3]" />
             <span>Watered! (+15%)</span>
           </>
         ) : (
           <>
-            <Check className="w-5 h-5 stroke-[3]" />
-            <span>Water</span>
+            <Check className="w-4 h-4 stroke-[3]" />
+            <span>Water Now</span>
           </>
         )}
       </button>
 
-      {/* Schedule Button (Temporary interactive button) */}
+      {/* Schedule Button */}
       <button
         type="button"
         onClick={handleScheduleClick}
-        className="w-full bg-[#FFF8E7] hover:bg-white text-[#556925] border-2 border-[#768C3A]/50 hover:border-[#768C3A] font-bold text-sm sm:text-base py-2.5 px-4 rounded-xl sm:rounded-2xl shadow-xs transition-all duration-200 cursor-pointer active:scale-98 flex items-center justify-center gap-2 relative"
+        className="w-full bg-[#FFF8E7] hover:bg-white text-[#556925] border-2 border-[#768C3A]/50 hover:border-[#768C3A] font-bold text-xs sm:text-sm py-3 px-3 rounded-2xl shadow-xs transition-all duration-200 cursor-pointer active:scale-98 flex items-center justify-center gap-2"
       >
-        <Calendar className="w-4 h-4 text-[#768C3A]" />
-        <span>{scheduleNotice ? 'Schedule (Coming Soon)' : 'Schedule'}</span>
+        <Calendar className="w-4 h-4 text-[#768C3A] shrink-0" />
+        <span className="truncate">{scheduleNotice ? 'Coming Soon' : 'Schedule'}</span>
       </button>
 
       {/* Humidity Limit Button */}
       <button
         type="button"
         onClick={onOpenLimitModal}
-        className="w-full bg-[#FFF8E7] hover:bg-white text-[#556925] border-2 border-[#768C3A]/50 hover:border-[#768C3A] font-bold text-sm sm:text-base py-2.5 px-4 rounded-xl sm:rounded-2xl shadow-xs transition-all duration-200 cursor-pointer active:scale-98 flex items-center justify-center gap-2"
+        className="w-full bg-[#FFF8E7] hover:bg-white text-[#556925] border-2 border-[#768C3A]/50 hover:border-[#768C3A] font-bold text-xs sm:text-sm py-3 px-3 rounded-2xl shadow-xs transition-all duration-200 cursor-pointer active:scale-98 flex items-center justify-center gap-1.5"
       >
-        <Sliders className="w-4 h-4 text-[#768C3A]" />
-        <span>Humidity limit</span>
-        <span className="text-xs bg-[#48B0F7]/20 text-[#2573a7] px-2 py-0.5 rounded-md font-semibold ml-1">
+        <Sliders className="w-4 h-4 text-[#768C3A] shrink-0" />
+        <span>Limit</span>
+        <span className="text-[11px] bg-[#48B0F7]/20 text-[#2573a7] px-2 py-0.5 rounded-md font-extrabold ml-0.5">
           {humidityLimit}%
         </span>
       </button>

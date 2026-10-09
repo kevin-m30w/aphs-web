@@ -1,10 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { PlantCard } from './components/PlantCard';
 import { PlantDetails, type PlantDetailData } from './components/PlantDetails';
-import { Bell, Search, Plus, X, Sprout } from 'lucide-react';
+import { AuthPage } from './components/auth';
+import { WelcomeBanner, DashboardControls, AddPlantModal } from './components/dashboard';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { plantService } from './services/plantService';
 
-const INITIAL_PLANTS: PlantDetailData[] = [
+interface CurrentUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
+// Default mock user so you can develop on the main page immediately without logging in
+const DEFAULT_DEV_USER: CurrentUser = {
+  id: 'dev_user_123',
+  email: 'user@aphs.local',
+  name: 'User',
+};
+
+const DEFAULT_SAMPLE_PLANTS: PlantDetailData[] = [
   {
     id: 'F199238FN',
     name: 'Aloe Vera',
@@ -35,77 +51,109 @@ const INITIAL_PLANTS: PlantDetailData[] = [
     schedule: 'Weekly at 10:00 AM',
     lastWatered: '3 days ago',
   },
-  {
-    id: 'P992015ZX',
-    name: 'Peace Lily',
-    status: 'Connected',
-    humidity: 45,
-    humidityLimit: 85,
-    qdp: '240124904',
-    schedule: 'Every day at 07:30 AM',
-    lastWatered: 'Today at 07:30 AM',
-  },
-  {
-    id: 'F881920QA',
-    name: 'Fiddle Leaf Fig',
-    status: 'Connected',
-    humidity: 55,
-    humidityLimit: 70,
-    qdp: '240124905',
-    schedule: 'Every 3 days at 08:30 AM',
-    lastWatered: 'Yesterday',
-  },
-  {
-    id: 'G773910BV',
-    name: 'Golden Pothos',
-    status: 'Connected',
-    humidity: 70,
-    humidityLimit: 80,
-    qdp: '240124906',
-    schedule: 'Every 2 days at 09:00 AM',
-    lastWatered: 'Today at 06:00 AM',
-  },
 ];
 
 function App() {
-  const [plants, setPlants] = useState<PlantDetailData[]>(INITIAL_PLANTS);
+  // Start with default user so you directly land on the Main Page
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(DEFAULT_DEV_USER);
+  const [plants, setPlants] = useState<PlantDetailData[]>(DEFAULT_SAMPLE_PLANTS);
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddPlantModal, setShowAddPlantModal] = useState(false);
-  const [newPlantName, setNewPlantName] = useState('');
 
-  // Find selected plant object
+  // Sync Supabase Auth session if configured
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const u = session.user;
+        setCurrentUser({
+          id: u.id,
+          email: u.email || '',
+          name: u.user_metadata?.display_name || u.email?.split('@')[0] || 'User',
+        });
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const u = session.user;
+        setCurrentUser({
+          id: u.id,
+          email: u.email || '',
+          name: u.user_metadata?.display_name || u.email?.split('@')[0] || 'User',
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch plants from Supabase when user logs in with a real account
+  useEffect(() => {
+    if (currentUser?.id && currentUser.id !== 'dev_user_123') {
+      plantService
+        .getPlants(currentUser.id)
+        .then((userPlants) => {
+          if (userPlants.length > 0) {
+            setPlants(userPlants);
+          } else {
+            setPlants(DEFAULT_SAMPLE_PLANTS);
+          }
+        })
+        .catch(() => {
+          setPlants(DEFAULT_SAMPLE_PLANTS);
+        });
+    }
+  }, [currentUser]);
+
+  // If user explicitly logs out, show the AuthPage with a Skip button
+  if (!currentUser) {
+    return (
+      <AuthPage
+        onAuthSuccess={(user) => setCurrentUser(user)}
+        onSkip={() => setCurrentUser(DEFAULT_DEV_USER)}
+      />
+    );
+  }
+
+  // Find selected plant object for detail view
   const selectedPlant = plants.find((p) => p.id === selectedPlantId);
 
   // Update specific plant properties
-  const handleUpdatePlant = (plantId: string, updatedFields: Partial<PlantDetailData>) => {
+  const handleUpdatePlant = async (plantId: string, updatedFields: Partial<PlantDetailData>) => {
     setPlants((prev) =>
       prev.map((p) => (p.id === plantId ? { ...p, ...updatedFields } : p))
     );
+
+    if (currentUser?.id && currentUser.id !== 'dev_user_123') {
+      try {
+        await plantService.updatePlant(plantId, updatedFields);
+      } catch (err) {
+        console.error('Failed to sync plant update to Supabase:', err);
+      }
+    }
   };
 
   // Quick water from plant card
   const handleQuickWater = (plantId: string) => {
-    setPlants((prev) =>
-      prev.map((p) => {
-        if (p.id === plantId) {
-          const newHumidity = Math.min(100, p.humidity + 10);
-          return { ...p, humidity: newHumidity, lastWatered: 'Just now' };
-        }
-        return p;
-      })
-    );
+    const targetPlant = plants.find((p) => p.id === plantId);
+    if (!targetPlant) return;
+
+    const newHumidity = Math.min(targetPlant.humidityLimit || 80, targetPlant.humidity + 10);
+    handleUpdatePlant(plantId, {
+      humidity: newHumidity,
+      lastWatered: 'Just now',
+    });
   };
 
   // Add new plant handler
-  const handleAddNewPlant = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPlantName.trim()) return;
-
+  const handleAddNewPlant = async (plantName: string) => {
     const newId = `PLT-${Math.floor(100000 + Math.random() * 900000)}`;
     const newPlant: PlantDetailData = {
       id: newId,
-      name: newPlantName.trim(),
+      name: plantName,
       status: 'Connected',
       humidity: 50,
       humidityLimit: 80,
@@ -115,8 +163,21 @@ function App() {
     };
 
     setPlants((prev) => [newPlant, ...prev]);
-    setNewPlantName('');
-    setShowAddPlantModal(false);
+
+    if (currentUser?.id && currentUser.id !== 'dev_user_123') {
+      try {
+        await plantService.addPlant(newPlant, currentUser.id);
+      } catch (err) {
+        console.error('Failed to save new plant to Supabase:', err);
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    if (isSupabaseConfigured()) {
+      await supabase.auth.signOut();
+    }
+    setCurrentUser(null);
   };
 
   const filteredPlants = plants.filter(
@@ -145,80 +206,20 @@ function App() {
           <>
             {/* Top Control Bar: Responsive for Mobile & Desktop */}
             <div className="flex flex-col lg:flex-row lg:items-center gap-3.5 sm:gap-4">
-              {/* Welcome Card & Mobile Bell Wrapper */}
-              <div className="flex items-center gap-3 w-full lg:w-auto">
-                {/* User Welcome Card */}
-                <div className="flex-1 lg:w-72 xl:w-80 bg-[#F7A503] text-white p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl shadow-xs flex items-center gap-3 sm:gap-4 border border-[#F7A503]">
-                  {/* Avatar Placeholder */}
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#D4D8DC] shrink-0 border-2 border-white/50 flex items-center justify-center text-xl">
-                    🌱
-                  </div>
+              
+              {/* Welcome Banner Component */}
+              <WelcomeBanner
+                userName={currentUser.name}
+                onLogout={handleLogout}
+              />
 
-                  <div className="min-w-0">
-                    <p className="text-sm sm:text-base font-bold text-white tracking-wide leading-tight">
-                      Welcome back!
-                    </p>
-                    <p className="text-xs sm:text-sm font-semibold text-white/90 mt-0.5">
-                      User
-                    </p>
-                  </div>
-                </div>
-
-                {/* Notification Bell (Visible on Mobile here) */}
-                <button
-                  type="button"
-                  aria-label="Notifications"
-                  className="lg:hidden w-12 h-12 rounded-full bg-[#FFE8BC] border-2 border-[#F7A503] flex items-center justify-center text-[#F7A503] shadow-xs shrink-0 cursor-pointer hover:bg-[#ffdabc] transition-colors"
-                >
-                  <Bell className="w-6 h-6 fill-[#F7A503]/20" />
-                </button>
-              </div>
-
-              {/* Search Bar & Action Area */}
-              <div className="flex-1 flex flex-col gap-2">
-                <div className="flex items-center gap-3">
-                  {/* Search Bar */}
-                  <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-900/50">
-                      <Search className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search plants by name or ID..."
-                      className="w-full pl-9 pr-4 py-2 sm:py-2.5 bg-[#FFF8E7] border-2 border-[#F7A503] rounded-xl sm:rounded-2xl text-sm font-medium text-[#3B3A36] placeholder-amber-900/40 outline-none transition-all focus:ring-2 focus:ring-[#F7A503]/30"
-                    />
-                  </div>
-
-                  {/* Notification Bell (Visible on Desktop here) */}
-                  <button
-                    type="button"
-                    aria-label="Notifications"
-                    className="hidden lg:flex w-11 h-11 rounded-full bg-[#FFE8BC] border-2 border-[#F7A503] items-center justify-center text-[#F7A503] shadow-xs shrink-0 cursor-pointer hover:bg-[#ffdabc] transition-colors"
-                  >
-                    <Bell className="w-5 h-5 fill-[#F7A503]/20" />
-                  </button>
-                </div>
-
-                {/* Action Bar: New Plant Button */}
-                <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddPlantModal(true)}
-                    className="inline-flex items-center gap-1.5 bg-[#FFF8E7] hover:bg-white text-[#768C3A] font-bold text-xs px-3.5 py-1.5 rounded-lg sm:rounded-xl border-2 border-[#F7A503] shadow-xs cursor-pointer active:scale-95 transition-all"
-                  >
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#F7A503] text-white flex items-center justify-center">
-                      <Plus className="w-2.5 h-2.5 stroke-[3]" />
-                    </span>
-                    New plant
-                  </button>
-
-                  <span className="text-xs font-semibold text-amber-950/60">
-                    {filteredPlants.length} {filteredPlants.length === 1 ? 'plant' : 'plants'} monitored
-                  </span>
-                </div>
-              </div>
+              {/* Search & New Plant Controls Component */}
+              <DashboardControls
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onOpenAddModal={() => setShowAddPlantModal(true)}
+                plantCount={filteredPlants.length}
+              />
             </div>
 
             {/* Plant Cards Responsive Grid */}
@@ -250,59 +251,12 @@ function App() {
 
       </main>
 
-      {/* --- Add New Plant Modal --- */}
-      {showAddPlantModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-[#FAF4E8] border-3 border-[#F7A503] rounded-3xl p-5 sm:p-6 w-full max-w-sm shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-[#556925]">
-                <Sprout className="w-5 h-5 text-[#768C3A]" />
-                <h3 className="text-lg font-bold">Add New Plant</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAddPlantModal(false)}
-                className="text-amber-900/50 hover:text-amber-950 p-1 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddNewPlant} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-amber-950/70 mb-1">
-                  Plant Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Monstera Deliciosa"
-                  value={newPlantName}
-                  onChange={(e) => setNewPlantName(e.target.value)}
-                  autoFocus
-                  className="w-full bg-[#FFF8E7] border-2 border-[#F7A503] rounded-xl px-3 py-2 text-sm font-semibold text-[#556925] outline-none placeholder-amber-900/40"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddPlantModal(false)}
-                  className="flex-1 bg-white border border-amber-900/20 text-amber-950 font-bold py-2 rounded-xl text-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!newPlantName.trim()}
-                  className="flex-1 bg-[#F7A503] hover:bg-[#d69f30] disabled:opacity-50 text-white font-bold py-2 rounded-xl text-sm shadow-xs cursor-pointer"
-                >
-                  Add Plant
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* --- Add New Plant Modal Component --- */}
+      <AddPlantModal
+        isOpen={showAddPlantModal}
+        onClose={() => setShowAddPlantModal(false)}
+        onAddPlant={handleAddNewPlant}
+      />
     </div>
   );
 }
