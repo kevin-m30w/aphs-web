@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Header } from '../Header';
-import { LoginForm } from './LoginForm';
-import { RegisterForm } from './RegisterForm';
+import { Header } from '../components/Header';
+import { LoginForm, RegisterForm } from '../components/auth';
 import { Sprout, ArrowRight } from 'lucide-react';
 
 export interface AuthPageProps {
@@ -31,12 +30,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess, onSkip }) => 
 
       {/* Main Container */}
       <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
-        <div className="w-full max-w-md bg-[#FFE8BC]/70 border-3 border-[#F7A503] rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden backdrop-blur-xs animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-full max-w-md bg-[#FFE8BC]/80 border-2 border-[#F7A503] rounded-2xl p-6 sm:p-8 shadow-md relative overflow-hidden backdrop-blur-xs animate-in fade-in zoom-in-95 duration-200">
           
-          {/* Subtle background glow */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#F7A503]/20 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-[#768C3A]/20 rounded-full blur-2xl pointer-events-none" />
-
           {/* Plant Icon & Welcome Header */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="w-14 h-14 rounded-2xl bg-[#FFF8E7] border-2 border-[#F7A503] flex items-center justify-center text-[#768C3A] mb-3 shadow-xs">
@@ -53,11 +48,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess, onSkip }) => 
           </div>
 
           {/* Tab Selector */}
-          <div className="flex p-1 bg-[#FFF8E7] border-2 border-[#FFDABC] rounded-2xl mb-6 shadow-inner">
+          <div className="flex p-1 bg-[#FFF8E7] border-2 border-[#FFDABC] rounded-xl mb-6 shadow-inner">
             <button
               type="button"
               onClick={() => setActiveTab('login')}
-              className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${
+              className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'login'
                   ? 'bg-[#F7A503] text-white shadow-xs'
                   : 'text-amber-900/60 hover:text-amber-950'
@@ -68,7 +63,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess, onSkip }) => 
             <button
               type="button"
               onClick={() => setActiveTab('register')}
-              className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${
+              className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'register'
                   ? 'bg-[#F7A503] text-white shadow-xs'
                   : 'text-amber-900/60 hover:text-amber-950'

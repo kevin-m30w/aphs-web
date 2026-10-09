@@ -27,7 +27,7 @@ export const DashboardControls: React.FC<DashboardControlsProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search plants by name or ID..."
-            className="w-full pl-9 pr-4 py-2 sm:py-2.5 bg-[#FFF8E7] border-2 border-[#F7A503] rounded-xl sm:rounded-2xl text-sm font-medium text-[#3B3A36] placeholder-amber-900/40 outline-none transition-all focus:ring-2 focus:ring-[#F7A503]/30"
+            className="w-full pl-9 pr-4 py-2 sm:py-2.5 bg-[#FFF8E7] border-2 border-[#F7A503] rounded-xl text-sm font-medium text-[#3B3A36] placeholder-amber-900/40 outline-none transition-all focus:ring-2 focus:ring-[#F7A503]/30"
           />
         </div>
 
@@ -35,7 +35,7 @@ export const DashboardControls: React.FC<DashboardControlsProps> = ({
         <button
           type="button"
           aria-label="Notifications"
-          className="hidden lg:flex w-11 h-11 rounded-full bg-[#FFE8BC] border-2 border-[#F7A503] items-center justify-center text-[#F7A503] shadow-xs shrink-0 cursor-pointer hover:bg-[#ffdabc] transition-colors"
+          className="hidden lg:flex w-11 h-11 rounded-xl bg-[#FFE8BC] border-2 border-[#F7A503] items-center justify-center text-[#F7A503] shadow-xs shrink-0 cursor-pointer hover:bg-[#ffdabc] transition-colors"
         >
           <Bell className="w-5 h-5 fill-[#F7A503]/20" />
         </button>
@@ -46,7 +46,7 @@ export const DashboardControls: React.FC<DashboardControlsProps> = ({
         <button
           type="button"
           onClick={onOpenAddModal}
-          className="inline-flex items-center gap-1.5 bg-[#FFF8E7] hover:bg-white text-[#768C3A] font-bold text-xs px-3.5 py-1.5 rounded-lg sm:rounded-xl border-2 border-[#F7A503] shadow-xs cursor-pointer active:scale-95 transition-all"
+          className="inline-flex items-center gap-1.5 bg-[#FFF8E7] hover:bg-white text-[#768C3A] font-bold text-xs px-3.5 py-1.5 rounded-xl border-2 border-[#F7A503] shadow-xs cursor-pointer active:scale-95 transition-all"
         >
           <span className="w-3.5 h-3.5 rounded-full bg-[#F7A503] text-white flex items-center justify-center">
             <Plus className="w-2.5 h-2.5 stroke-[3]" />

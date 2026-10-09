@@ -1,3 +1,3 @@
-export { WelcomeBanner } from './WelcomeBanner';
-export { DashboardControls } from './DashboardControls';
-export { AddPlantModal } from './AddPlantModal';
+export { WelcomeBanner, type WelcomeBannerProps } from './WelcomeBanner';
+export { DashboardControls, type DashboardControlsProps } from './DashboardControls';
+export { AddPlantModal, type AddPlantModalProps } from './AddPlantModal';

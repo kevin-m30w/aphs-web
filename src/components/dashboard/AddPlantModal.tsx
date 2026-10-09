@@ -26,7 +26,7 @@ export const AddPlantModal: React.FC<AddPlantModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-[#FAF4E8] border-3 border-[#F7A503] rounded-3xl p-5 sm:p-6 w-full max-w-sm shadow-2xl">
+      <div className="bg-[#FAF4E8] border-3 border-[#F7A503] rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-[#556925]">
             <Sprout className="w-5 h-5 text-[#768C3A]" />

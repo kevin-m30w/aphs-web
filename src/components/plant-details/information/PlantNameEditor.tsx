@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Pencil, Check, X } from 'lucide-react';
 
-interface PlantNameEditorProps {
+export interface PlantNameEditorProps {
   name: string;
   onSaveName: (newName: string) => void;
 }
 
-export const PlantNameEditor: React.FC<PlantNameEditorProps> = ({ name, onSaveName }) => {
+export const PlantNameEditor: React.FC<PlantNameEditorProps> = ({
+  name,
+  onSaveName,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(name);
 
-  useEffect(() => {
-    setTempName(name);
-  }, [name]);
-
-  const handleSave = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (tempName.trim()) {
+  const handleSave = () => {
+    if (tempName.trim() && tempName.trim() !== name) {
       onSaveName(tempName.trim());
     }
     setIsEditing(false);
@@ -27,33 +25,40 @@ export const PlantNameEditor: React.FC<PlantNameEditorProps> = ({ name, onSaveNa
     setIsEditing(false);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') handleSave();
+    if (e.key === 'Escape') handleCancel();
+  };
+
   return (
-    <div className="w-full flex items-center justify-center gap-2 mb-4">
+    <div className="flex items-center">
       {isEditing ? (
-        <form onSubmit={handleSave} className="flex items-center gap-2 max-w-full">
+        <div className="flex items-center gap-1.5 w-full max-w-sm">
           <input
             type="text"
             value={tempName}
             onChange={(e) => setTempName(e.target.value)}
+            onKeyDown={handleKeyDown}
             autoFocus
-            className="text-xl sm:text-2xl font-black text-[#556925] bg-white px-3 py-1 rounded-xl border-2 border-[#768C3A] outline-none text-center shadow-inner"
+            className="w-full bg-[#FFF8E7] border-2 border-[#F7A503] rounded-xl px-2.5 py-1 text-xl sm:text-2xl font-bold text-[#556925] outline-none shadow-inner"
           />
           <button
-            type="submit"
-            className="bg-[#768C3A] hover:bg-[#556925] text-white p-1.5 rounded-lg shadow-xs cursor-pointer transition-transform active:scale-90"
-            title="Save Name"
+            type="button"
+            onClick={handleSave}
+            aria-label="Save name"
+            className="p-1.5 rounded-lg bg-[#768C3A] text-white hover:bg-[#556925] transition-colors cursor-pointer shrink-0"
           >
             <Check className="w-4 h-4 stroke-[3]" />
           </button>
           <button
             type="button"
             onClick={handleCancel}
-            className="bg-amber-800/20 hover:bg-amber-800/30 text-amber-950 p-1.5 rounded-lg cursor-pointer transition-transform active:scale-90"
-            title="Cancel"
+            aria-label="Cancel editing"
+            className="p-1.5 rounded-lg bg-amber-200 text-amber-900 hover:bg-amber-300 transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
-        </form>
+        </div>
       ) : (
         <div
           className="flex items-center gap-2 group cursor-pointer"
@@ -62,7 +67,7 @@ export const PlantNameEditor: React.FC<PlantNameEditorProps> = ({ name, onSaveNa
             setIsEditing(true);
           }}
         >
-          <h2 className="text-2xl sm:text-3xl font-black text-[#556925] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#556925] tracking-tight">
             {name}
           </h2>
           <button

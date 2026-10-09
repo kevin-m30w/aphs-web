@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Header } from './components/Header';
-import { PlantCard } from './components/PlantCard';
-import { PlantDetails, type PlantDetailData } from './components/PlantDetails';
-import { AuthPage } from './components/auth';
-import { WelcomeBanner, DashboardControls, AddPlantModal } from './components/dashboard';
+import { AuthPage, DashboardPage, PlantDetailsPage, type PlantDetailData } from './pages';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { plantService } from './services/plantService';
 
@@ -58,8 +54,6 @@ function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(DEFAULT_DEV_USER);
   const [plants, setPlants] = useState<PlantDetailData[]>(DEFAULT_SAMPLE_PLANTS);
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showAddPlantModal, setShowAddPlantModal] = useState(false);
 
   // Sync Supabase Auth session if configured
   useEffect(() => {
@@ -107,19 +101,6 @@ function App() {
         });
     }
   }, [currentUser]);
-
-  // If user explicitly logs out, show the AuthPage with a Skip button
-  if (!currentUser) {
-    return (
-      <AuthPage
-        onAuthSuccess={(user) => setCurrentUser(user)}
-        onSkip={() => setCurrentUser(DEFAULT_DEV_USER)}
-      />
-    );
-  }
-
-  // Find selected plant object for detail view
-  const selectedPlant = plants.find((p) => p.id === selectedPlantId);
 
   // Update specific plant properties
   const handleUpdatePlant = async (plantId: string, updatedFields: Partial<PlantDetailData>) => {
@@ -180,84 +161,44 @@ function App() {
     setCurrentUser(null);
   };
 
-  const filteredPlants = plants.filter(
-    (plant) =>
-      plant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      plant.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 1. If not logged in, render the Auth Page
+  if (!currentUser) {
+    return (
+      <AuthPage
+        onAuthSuccess={(user) => setCurrentUser(user)}
+        onSkip={() => setCurrentUser(DEFAULT_DEV_USER)}
+      />
+    );
+  }
 
-  return (
-    <div className="min-h-screen bg-[#FAF4E8] text-[#3B3A36] flex flex-col selection:bg-[#FFDABC]">
-      {/* Top Header */}
-      <Header />
+  // Find selected plant object for detail view
+  const selectedPlant = plants.find((p) => p.id === selectedPlantId);
 
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 flex flex-col gap-5 sm:gap-6">
-        
-        {/* If a plant is selected, show the Plant Details View */}
-        {selectedPlant ? (
-          <PlantDetails
+  // 2. If a plant is selected, render the Plant Details Page
+  if (selectedPlant) {
+    return (
+      <div className="min-h-screen bg-[#FAF4E8] text-[#3B3A36] flex flex-col selection:bg-[#FFDABC]">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+          <PlantDetailsPage
             plant={selectedPlant}
             onBack={() => setSelectedPlantId(null)}
             onUpdatePlant={(updated) => handleUpdatePlant(selectedPlant.id, updated)}
           />
-        ) : (
-          /* Otherwise show Dashboard & Plant Cards Grid */
-          <>
-            {/* Top Control Bar: Responsive for Mobile & Desktop */}
-            <div className="flex flex-col lg:flex-row lg:items-center gap-3.5 sm:gap-4">
-              
-              {/* Welcome Banner Component */}
-              <WelcomeBanner
-                userName={currentUser.name}
-                onLogout={handleLogout}
-              />
+        </main>
+      </div>
+    );
+  }
 
-              {/* Search & New Plant Controls Component */}
-              <DashboardControls
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onOpenAddModal={() => setShowAddPlantModal(true)}
-                plantCount={filteredPlants.length}
-              />
-            </div>
-
-            {/* Plant Cards Responsive Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5 pb-10">
-              {filteredPlants.length > 0 ? (
-                filteredPlants.map((plant) => (
-                  <PlantCard
-                    key={plant.id}
-                    id={plant.id}
-                    name={plant.name}
-                    status={plant.status}
-                    humidity={plant.humidity}
-                    imageUrl={plant.imageUrl}
-                    onSelectDetail={(id) => setSelectedPlantId(id)}
-                    onWater={(id) => handleQuickWater(id)}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full bg-[#FFF8E7] border-2 border-dashed border-[#FFDABC] rounded-3xl p-8 text-center">
-                  <p className="text-sm font-bold text-amber-900/60">No plants found</p>
-                  <p className="text-xs text-amber-900/40 mt-1">
-                    Try searching another plant name or ID
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-      </main>
-
-      {/* --- Add New Plant Modal Component --- */}
-      <AddPlantModal
-        isOpen={showAddPlantModal}
-        onClose={() => setShowAddPlantModal(false)}
-        onAddPlant={handleAddNewPlant}
-      />
-    </div>
+  // 3. Default: Render the Dashboard Page
+  return (
+    <DashboardPage
+      userName={currentUser.name}
+      onLogout={handleLogout}
+      plants={plants}
+      onSelectDetail={(id) => setSelectedPlantId(id)}
+      onWater={(id) => handleQuickWater(id)}
+      onAddPlant={handleAddNewPlant}
+    />
   );
 }
 

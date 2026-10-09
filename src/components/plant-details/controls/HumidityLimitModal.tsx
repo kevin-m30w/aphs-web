@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sliders, X } from 'lucide-react';
 
-interface HumidityLimitModalProps {
+export interface HumidityLimitModalProps {
   currentLimit: number;
   isOpen: boolean;
   onClose: () => void;
@@ -24,7 +24,7 @@ export const HumidityLimitModal: React.FC<HumidityLimitModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-[#FAF4E8] border-3 border-[#F7A503] rounded-3xl p-5 sm:p-6 w-full max-w-sm shadow-2xl">
+      <div className="bg-[#FAF4E8] border-3 border-[#F7A503] rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-[#556925]">
             <Sliders className="w-5 h-5 text-[#48B0F7]" />
@@ -44,25 +44,23 @@ export const HumidityLimitModal: React.FC<HumidityLimitModalProps> = ({
             When soil moisture falls below or reaches this limit, APHS triggers automated watering alerts.
           </p>
 
-          <div className="text-center bg-[#FFF8E7] border-2 border-[#F7A503] rounded-2xl p-4">
-            <span className="text-3xl font-black text-[#48B0F7]">
+          <div className="text-center bg-[#FFF8E7] border-2 border-[#F7A503] rounded-xl p-4">
+            <span className="text-3xl font-extrabold text-[#556925]">
               {tempLimit}%
             </span>
-            <p className="text-[11px] font-semibold text-amber-950/60 mt-0.5">Threshold Target</p>
             <input
               type="range"
-              min="20"
-              max="95"
+              min="0"
+              max="100"
               step="5"
               value={tempLimit}
               onChange={(e) => setTempLimit(Number(e.target.value))}
               className="w-full mt-3 accent-[#F7A503] cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] font-bold text-amber-900/50 mt-1">
-              <span>20% (Dry)</span>
+            <div className="flex justify-between text-xs font-semibold text-amber-950/60 mt-1.5 px-0.5">
+              <span>0%</span>
               <span>50%</span>
-              <span>80% (Optimal)</span>
-              <span>95% (Moist)</span>
+              <span>100%</span>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import type { PlantDetailData } from '../components/PlantDetails';
+import type { PlantDetailData } from '../pages';
 
 export const plantService = {
   /**

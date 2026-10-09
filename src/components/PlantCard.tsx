@@ -33,14 +33,16 @@ export const PlantCard: React.FC<PlantCardProps> = ({
         {/* Plant Details */}
         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
           <div>
+            {/* Plant Name */}
             <h3 
               onClick={() => onSelectDetail?.(id)}
               className="text-lg sm:text-xl font-bold text-[#556925] truncate cursor-pointer hover:underline"
             >
               {name}
             </h3>
+            {/* ID directly under the Name */}
             <p className="text-[11px] sm:text-xs font-semibold text-amber-950/60 mt-0.5">
-              ID: <span className="font-mono">{id}</span>
+              ID: <span className="font-mono text-amber-950/80">{id}</span>
             </p>
             <p className="text-[11px] sm:text-xs font-medium text-amber-950/70 mt-0.5">
               Status:{' '}
@@ -55,9 +57,10 @@ export const PlantCard: React.FC<PlantCardProps> = ({
             <div className="flex items-center gap-3">
               <div>
                 <p className="text-[11px] sm:text-xs text-amber-950/75 font-medium">Humidity:</p>
-                <div className="flex items-center gap-1 text-[#48B0F7] font-bold text-sm sm:text-base">
+                <div className="flex items-center gap-1 text-[#48B0F7] text-sm sm:text-base">
                   <Droplet className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-[#48B0F7] text-[#48B0F7]" />
-                  <span className="text-[#F7A503] font-extrabold">{humidity}%</span>
+                  {/* % and number in black, bold but not too bold */}
+                  <span className="text-black font-semibold tracking-tight">{humidity}%</span>
                 </div>
               </div>
 
