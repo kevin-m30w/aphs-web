@@ -1,1 +1,1 @@
-export { DetailNavBar, type DetailNavBarProps } from './DetailNavBar';
+export { DetailNavBar, type DetailNavBarProps } from "./DetailNavBar";
